@@ -1,0 +1,5 @@
+.idea/*
+*.pyc
+server.log
+TWISTD-CRASH.log
+test.db
