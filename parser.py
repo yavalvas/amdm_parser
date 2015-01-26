@@ -88,7 +88,7 @@ class AmDmParser(object):
                 proxy = self.candidate_proxies[randint(0, len(self.candidate_proxies)-1)]
                 proxy={"https": proxy}
                 print "Trying HTTP proxy %s" % proxy
-                html = urllib.urlopen(href, proxies=proxy).read()
+                html = urllib.urlopen("http:"+href, proxies=proxy).read()
                 if "Too Many Requests" in html:
                     print "Too Many Requests"
                     continue
@@ -146,7 +146,7 @@ class AmDmParser(object):
         return elem['href'], elem.string
     def get_full_struct(self, elem):
         return elem['href'], elem.string, \
-            map(self.get_part_struct, self.find_songs(elem['href'])[:-1])
+            map(self.get_part_struct, self.find_songs(elem['href'][2:])[:-1])
 
     def find_artists(self, url):
         while(1):
@@ -155,7 +155,7 @@ class AmDmParser(object):
                 proxy = self.candidate_proxies[randint(0, len(self.candidate_proxies)-1)]
                 proxy = {"https": proxy}
                 print "Trying HTTP proxy %s" % proxy
-                html = urllib.urlopen(url, proxies=proxy).read()
+                html = urllib.urlopen("http://"+url, proxies=proxy).read()
                 if "Too Many Requests" in html:
                         print "Too Many Requests"
                         continue
