@@ -1,5 +1,10 @@
 .idea/*
 *.pyc
+.cyr/*
+.lat/*
+.any/*
+songs_singers.db
+
 server.log
 TWISTD-CRASH.log
 test.db
