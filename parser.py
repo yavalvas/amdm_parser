@@ -78,10 +78,19 @@ class AmDmParser(object):
     def set_proxies_list(self):
         self.candidate_proxies=[]
         for url_with_proxies in self.urls_with_proxies:
-            html = urllib.request.urlopen(url_with_proxies).read()
+            html = urllib.request.urlopen(self.get_request_obj(url_with_proxies)).read()
             new_html = html.split(b"\r")
             other_list = new_html[3:-1]
             self.candidate_proxies.extend([i.split(b";")[0] for i in other_list])
+
+    def get_request_obj(self, url):
+        return urllib.request.Request(
+            url,
+            data=None,
+            headers={
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
+            }
+        )
 
     def _download_data(self, href, path, song):
         while(1):
@@ -91,7 +100,7 @@ class AmDmParser(object):
                 proxy={"https": proxy}
                 print("Trying HTTP proxy %s" % proxy)
                 self.set_opener(proxy)
-                html = urllib.request.urlopen("http:"+href).read()
+                html = urllib.request.urlopen(self.get_request_obj("http:"+href)).read()
                 if b"Too Many Requests" in html:
                     print("Too Many Requests")
                     continue
@@ -164,7 +173,7 @@ class AmDmParser(object):
                 proxy = {"https": proxy}
                 print("Trying HTTP proxy %s" % proxy)
                 self.set_opener(proxy)
-                html = urllib.request.urlopen(url).read()
+                html = urllib.request.urlopen(self.get_request_obj(url)).read()
                 if b"Too Many Requests" in html:
                     print("Too Many Requests")
                     continue
@@ -183,7 +192,7 @@ class AmDmParser(object):
                 print("Trying HTTP proxy %s" % proxy)
                 proxy = {"https": proxy}
                 self.set_opener(proxy)
-                html = urllib.request.urlopen("http://"+url).read()
+                html = urllib.request.urlopen(self.get_request_obj("http://"+url)).read()
                 if b"Too Many Requests" in html:
                     print("Too Many Requests")
                     continue
