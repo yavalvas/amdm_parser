@@ -9,8 +9,10 @@ from pymongo import MongoClient
 from sqlalchemy import create_engine, Table, Column, MetaData, String
 from change_color import change_pic
 import socket
+from gevent import spawn, monkey, joinall
 import inspect
 socket.setdefaulttimeout(2)
+monkey.patch_all()
 
 
 def mongo_init():
@@ -134,6 +136,7 @@ class AmDmParser(object):
                 self.insert_info_sqlite(self.cur_dir.split("/")[-2], self.i, self.singer, self.singer_eng, song_words, path+song, href, song_name.string)
                 break
             except Exception as e:
+                print("Exception", e)
                 print("Trying next proxy", inspect.stack()[0][3])
 
     def _make_dir(self, href):
@@ -161,6 +164,7 @@ class AmDmParser(object):
             list(map(self.get_part_struct, self.find_songs(elem['href'][2:])[:-1]))
 
     def set_opener(self, proxy):
+        proxy = {'http': '127.0.0.1:8118'}
         proxy_support = urllib.request.ProxyHandler(proxy)
         opener = urllib.request.build_opener(proxy_support)
         urllib.request.install_opener(opener)
@@ -182,6 +186,7 @@ class AmDmParser(object):
                 artists = map(self.get_full_struct, soup.findAll('a',{'class':'artist'}))
                 return list(artists)
             except Exception as e:
+                print("Exception", e)
                 print("Trying next proxy", inspect.stack()[0][3])
 
     def find_songs(self, url):
@@ -204,13 +209,12 @@ class AmDmParser(object):
                 print(self.singer_eng)
                 return songs
             except Exception as e:
+                print("Exception", e)
                 print("Trying next proxy", inspect.stack()[0][3])
 
     def get_arts_info(self, a, b, art_dict):
-        for self.i in range(a,b):
-            cur_url = "http://www.amdm.ru/chords/%s"%self.i
-            art_info=self.find_artists(cur_url)
-        return art_info
+        jobs = [spawn(self.find_artists, "http://www.amdm.ru/chords/%s"%self.i) for self.i in range(a, b)]
+        joinall(jobs)
 
     def get_one_art_info(self, cur_url = "http://www.amdm.ru/chords/0"):
         strange_art = self.find_artists(cur_url)
